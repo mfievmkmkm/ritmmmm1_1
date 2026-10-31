@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Ритм — мой планировщик",
+  "short_name": "Ритм",
+  "description": "Личный планировщик задач, привычек и дневника с синхронизацией Supabase.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c0e17",
+  "theme_color": "#0c0e17",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

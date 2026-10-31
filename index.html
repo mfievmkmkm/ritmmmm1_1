@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0e17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ритм">
+  <meta name="description" content="Ритм — личный планировщик: дела на каждый день, привычки, календарь и статистика. С синхронизацией Supabase между устройствами.">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <title>Ритм — твой день под контролем</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button type="button" class="brand reset-btn" data-action="go-home" aria-label="Ритм — на главную">
+        <span class="brand-mark"><span data-icon="check-double"></span></span>
+        <span class="brand-copy"><b>РИТМ</b><small>твой планировщик</small></span>
+      </button>
+      <nav class="desktop-nav" aria-label="Основные разделы">
+        <button class="nav-link is-active" data-view="day"><span data-icon="sun"></span> День</button>
+        <button class="nav-link" data-view="week"><span data-icon="calendar-days"></span> Неделя</button>
+        <button class="nav-link" data-view="month"><span data-icon="calendar"></span> Календарь</button>
+        <button class="nav-link" data-view="habits"><span data-icon="repeat"></span> Привычки</button>
+        <button class="nav-link" data-view="stats"><span data-icon="chart"></span> Статистика</button>
+      </nav>
+      <div class="top-actions">
+        <button type="button" class="local-pill cloud-pill" id="cloud-pill" data-cloud-action="open" title="Состояние синхронизации"><span class="live-dot" id="cloud-dot"></span><span id="cloud-pill-label">Локально</span></button>
+        <button class="icon-button settings-trigger" data-action="settings" type="button" title="Настройки" aria-label="Настройки"><span data-icon="settings"></span></button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="hero">
+        <div class="hero-text"><div class="eyebrow"><span class="eyebrow-line"></span> ТВОЁ ВРЕМЯ · ТВОИ ПРАВИЛА</div>
+          <h1 id="hero-title">Планируй. Делай.<br>Отмечай.</h1>
+          <p class="hero-subtitle" id="hero-subtitle">Порядок в делах, спокойствие в голове. Каждый день.</p>
+        </div>
+        <button type="button" class="button-primary hero-add" data-action="add"><span data-icon="plus"></span><span class="hero-add-text">Новое дело</span></button>
+      </section>
+
+      <section id="view-day" class="view is-visible" aria-label="План на день">
+        <div class="week-strip panel">
+          <div class="section-top strip-top">
+            <div><span class="subhead">ТВОЯ НЕДЕЛЯ</span><h2 id="week-range">Неделя</h2><p class="under-heading">Выбирай день и отмечай выполненное</p></div>
+            <div class="arrow-group"><button type="button" class="mini-button today-link" data-action="today">Сегодня</button><button type="button" class="icon-button" data-action="prev-week" aria-label="Предыдущая неделя"><span data-icon="chevron-left"></span></button><button type="button" class="icon-button" data-action="next-week" aria-label="Следующая неделя"><span data-icon="chevron-right"></span></button></div>
+          </div>
+          <div class="week-days" id="week-days" aria-label="Дни недели"></div>
+        </div>
+        <div class="dashboard-layout">
+          <div class="main-stack">
+            <section class="panel tasks-panel">
+              <div class="section-top tasks-head"><div><span class="subhead" id="day-date-label">СЕГОДНЯ</span><h2 id="day-heading">Дела на сегодня</h2><p class="under-heading" id="day-message">Запланируй то, что имеет значение.</p></div><span class="count-tag" id="task-count-tag">0 дел</span></div>
+              <div id="daily-tasks"></div>
+              <button type="button" class="add-dashed" data-action="add-once"><span data-icon="plus"></span> Добавить дело на этот день</button>
+            </section>
+            <section class="panel journal-panel">
+              <div class="journal-title"><span class="journal-emoji">✦</span><div><h3>Итог дня</h3><p>Что удалось, какие мысли хочется оставить?</p></div><span class="tiny-tag" id="journal-status">Личный дневник</span></div>
+              <textarea id="journal-input" class="journal-input" maxlength="4000" rows="3" placeholder="Напиши пару строк о своём дне…" aria-label="Заметка за выбранный день"></textarea>
+              <div class="journal-bottom"><span><span data-icon="lock"></span> Личный дневник</span><span id="journal-saved" role="status">Сохраняется автоматически</span></div>
+            </section>
+          </div>
+          <aside class="side-stack">
+            <section class="panel progress-panel"><div class="section-top compact"><span class="subhead">ПРОГРЕСС ДНЯ</span><span class="ring-bullet">●</span></div><div class="progress-circle-row"><div><div class="big-progress" id="big-progress">0%</div><p class="progress-line" id="progress-caption">Начни с первого дела</p></div><div class="progress-ring" id="progress-ring"><span data-icon="check"></span></div></div><div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div><div class="two-ends"><span id="done-caption">0 выполнено</span><span id="left-caption">0 осталось</span></div></section>
+            <section class="panel weekly-progress-panel"><div class="section-top compact"><div><h3>Вся неделя</h3><p class="under-heading" id="week-summary">0 из 0 выполнено</p></div><button class="small-arrow" data-view="week" title="Открыть неделю" aria-label="Открыть неделю"><span data-icon="arrow-up-right"></span></button></div><div id="weekly-bars" class="weekly-bars"></div></section>
+            <section class="quiet-card"><div class="quiet-icon"><span data-icon="sparkles"></span></div><div><b>Главное — последовательность</b><p>Не обязательно делать всё идеально. Достаточно становиться лучше понемногу.</p></div></section>
+          </aside>
+        </div>
+      </section>
+
+      <section id="view-week" class="view" aria-label="План на неделю">
+        <div class="section-top overview-head"><div><div class="subhead">СЕМЬ ДНЕЙ · ОДИН РИТМ</div><h2>План на неделю</h2><p class="under-heading" id="week-overview-range"></p></div><div class="arrow-group"><button class="mini-button" data-action="week-today">Текущая</button><button class="icon-button" data-action="prev-week" aria-label="Предыдущая неделя"><span data-icon="chevron-left"></span></button><button class="icon-button" data-action="next-week" aria-label="Следующая неделя"><span data-icon="chevron-right"></span></button></div></div>
+        <div id="week-summary-cards" class="summary-cards"></div>
+        <div id="week-cards" class="week-cards"></div>
+      </section>
+
+      <section id="view-month" class="view" aria-label="Календарь">
+        <div class="section-top overview-head"><div><div class="subhead">ВИДЕТЬ БОЛЬШЕ</div><h2>Календарь</h2><p class="under-heading">Все дни и достижения в одном месте</p></div><div class="arrow-group"><button class="mini-button" data-action="month-today">Этот месяц</button><button class="icon-button" data-action="prev-month" aria-label="Предыдущий месяц"><span data-icon="chevron-left"></span></button><button class="icon-button" data-action="next-month" aria-label="Следующий месяц"><span data-icon="chevron-right"></span></button></div></div>
+        <div class="panel calendar-panel"><div class="calendar-title" id="calendar-title">Месяц</div><div class="calendar-grid" id="calendar-grid"></div><div class="calendar-legend"><span><i class="legend-dot legend-none"></i> Нет дел</span><span><i class="legend-dot legend-some"></i> Есть прогресс</span><span><i class="legend-dot legend-all"></i> Всё выполнено</span></div></div>
+        <div class="calendar-after"><div class="panel selected-day-card"><div class="subhead">ВЫБРАННЫЙ ДЕНЬ</div><h3 id="calendar-selected-date">Сегодня</h3><p id="calendar-selected-info" class="under-heading"></p><button class="button-secondary" data-action="open-selected-day"><span data-icon="arrow-right"></span> Открыть дела на этот день</button></div><div class="panel calendar-hint"><div class="hint-icon"><span data-icon="lightbulb"></span></div><div><h3>Всё по своим датам</h3><p>Повторяющиеся дела появляются автоматически. Разовые остаются только в выбранный день, а галочки сохраняются навсегда.</p></div></div></div>
+      </section>
+
+      <section id="view-habits" class="view" aria-label="Повторяющиеся дела">
+        <div class="section-top overview-head"><div><div class="subhead">ПОВТОРЯЙ ХОРОШЕЕ</div><h2>Мои привычки</h2><p class="under-heading">Создай один раз — появится в нужные дни автоматически</p></div><button class="button-primary" data-action="add-repeat"><span data-icon="plus"></span> <span class="desktop-only">Новая привычка</span><span class="mobile-only">Добавить</span></button></div>
+        <div class="habit-summary" id="habit-summary"></div>
+        <div class="habit-tabs" role="group" aria-label="Фильтр привычек"><button type="button" class="filter-chip active" data-habit-filter="active">Активные</button><button type="button" class="filter-chip" data-habit-filter="archived">Архив</button></div>
+        <div class="habit-grid" id="habit-list"></div>
+      </section>
+
+      <section id="view-stats" class="view" aria-label="Статистика">
+        <div class="section-top overview-head"><div><div class="subhead">ТВОЙ ПУТЬ В ЦИФРАХ</div><h2>Статистика</h2><p class="under-heading">Без сравнения с другими — только твой прогресс</p></div></div>
+        <div class="summary-cards" id="stats-highlights"></div>
+        <div class="stats-layout"><section class="panel"><h3>Последние 14 дней</h3><p class="under-heading">Выполненные дела и общий план</p><div id="stats-chart" class="stats-chart"></div></section><section class="panel"><h3>Карта активности</h3><p class="under-heading">Последние 35 дней</p><div id="activity-grid" class="activity-grid"></div><div class="legend-plain">Темнее — меньше выполненных дел · Ярче — больше</div></section></div>
+        <div class="panel stats-hint" id="stats-hint">Добавь дела, чтобы здесь появилась статистика.</div>
+      </section>
+    </main>
+    <footer class="footer">РИТМ <span>·</span> каждый день имеет значение <span>·</span> твоё пространство</footer>
+  </div>
+
+  <nav class="mobile-nav" aria-label="Навигация">
+    <button class="mobile-nav-item is-active" data-view="day"><span data-icon="sun"></span><span>День</span></button>
+    <button class="mobile-nav-item" data-view="week"><span data-icon="calendar-days"></span><span>Неделя</span></button>
+    <button class="mobile-nav-item" data-view="month"><span data-icon="calendar"></span><span>Календарь</span></button>
+    <button class="mobile-nav-item" data-view="habits"><span data-icon="repeat"></span><span>Привычки</span></button>
+    <button class="mobile-nav-item" data-view="stats"><span data-icon="chart"></span><span>Итоги</span></button>
+  </nav>
+
+  <div class="modal-overlay" id="task-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-header"><div><div class="subhead" id="modal-kicker">НОВАЯ ЗАДАЧА</div><h2 id="modal-title">Добавить дело</h2></div><button type="button" class="icon-button" data-action="close-task" aria-label="Закрыть"><span data-icon="x"></span></button></div>
+      <form id="task-form" novalidate>
+        <label class="field-label" for="task-title-input">Название дела <span>*</span></label><input id="task-title-input" class="input" maxlength="120" autocomplete="off" placeholder="Например, прочитать 20 страниц" required>
+        <label class="field-label mtop" for="task-detail-input">Примечание <small>необязательно</small></label><input id="task-detail-input" class="input" maxlength="250" autocomplete="off" placeholder="Подробности, если нужны">
+        <div class="field-double"><div><label class="field-label" for="task-time-input">Время <small>необязательно</small></label><input type="time" id="task-time-input" class="input"></div><div><label class="field-label" for="task-category-input">Категория</label><select class="input select" id="task-category-input"><option value="personal">Личное</option><option value="study">Учёба</option><option value="health">Здоровье</option><option value="work">Работа</option><option value="other">Другое</option></select></div></div>
+        <label class="field-label mtop">Когда выполнять?</label><div class="mode-tabs" role="group" aria-label="Периодичность"><button class="mode-tab active" type="button" data-task-mode="once"><span data-icon="calendar"></span> Один раз</button><button class="mode-tab" type="button" data-task-mode="repeat"><span data-icon="repeat"></span> Повторять</button></div>
+        <div id="task-once-fields"><label class="field-label mtop" for="task-date-input">Дата</label><input id="task-date-input" class="input" type="date"></div>
+        <div id="task-repeat-fields" class="hidden"><label class="field-label mtop" for="task-repeat-input">Как часто?</label><select id="task-repeat-input" class="input select"><option value="daily">Каждый день</option><option value="weekdays">По будням (пн–пт)</option><option value="custom">Выбрать дни недели</option></select><div id="custom-days-wrap" class="hidden"><div class="field-label mtop">Выбери дни</div><div class="weekday-chooser" id="custom-days"></div></div><label class="field-label mtop" for="task-start-input">Начиная с</label><input type="date" id="task-start-input" class="input"><p class="form-help" id="repeat-help">Привычка появится в расписании автоматически.</p></div>
+        <div class="form-error" id="form-error" role="alert"></div>
+        <div class="modal-actions"><button class="button-secondary" type="button" data-action="close-task">Отмена</button><button class="button-primary" type="submit"><span data-icon="check"></span><span id="task-submit-label">Сохранить</span></button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="settings-overlay" aria-hidden="true">
+    <div class="modal settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title"><div class="modal-header"><div><div class="subhead">ТВОЁ ПРОСТРАНСТВО</div><h2 id="settings-title">Настройки</h2></div><button class="icon-button" data-action="close-settings" aria-label="Закрыть"><span data-icon="x"></span></button></div>
+      <div class="setting-card"><div class="setting-icon"><span data-icon="shield-check"></span></div><div><strong>Личное пространство</strong><p>Без входа дела сохраняются на этом устройстве. После подключения Supabase — синхронизируются между твоими устройствами.</p><div class="cloud-setting-row"><span id="cloud-status-text" class="cloud-status-text">Локальный режим</span><button type="button" class="button-secondary cloud-setting-button" data-cloud-action="open">Войти / облако</button></div></div></div>
+      <div class="settings-section"><h3>Резервная копия</h3><p>Особенно важно сделать копию перед сменой телефона или очисткой браузера.</p><div class="settings-buttons"><button type="button" class="button-secondary" data-action="export"><span data-icon="download"></span> Скачать мои данные</button><button type="button" class="button-secondary" data-action="import"><span data-icon="upload"></span> Восстановить из файла</button></div><input type="file" accept="application/json,.json" id="import-file" hidden></div>
+      <div class="settings-section"><h3>Вечерний обзор</h3><p>Напоминание внутри сайта после выбранного часа. Не является уведомлением на заблокированном телефоне.</p><div class="setting-row"><label for="evening-time">Показывать с</label><input class="input time-small" type="time" value="21:00" id="evening-time"></div></div>
+      <div class="settings-section"><h3>На главном экране iPhone</h3><p>Открой опубликованный сайт в Safari → «Поделиться» → «На экран Домой». Он будет запускаться отдельным окном.</p></div>
+      <div class="settings-section danger-section"><h3>Удалить все данные</h3><p>Удалит данные активного режима. Если включено облако, очистка также синхронизируется с Supabase. Сначала скачай копию.</p><button class="button-danger" data-action="clear-data">Очистить планировщик</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="cloud-overlay" aria-hidden="true">
+    <div class="modal cloud-modal" role="dialog" aria-modal="true" aria-labelledby="cloud-title">
+      <div class="modal-header"><div><div class="subhead">СИНХРОНИЗАЦИЯ · SUPABASE</div><h2 id="cloud-title">Моё облако</h2></div><button type="button" class="icon-button" data-cloud-action="close" aria-label="Закрыть"><span data-icon="x"></span></button></div>
+      <div class="cloud-inline-status" id="cloud-modal-status" role="status">Данные хранятся локально.</div>
+      <div id="cloud-config-view">
+        <p class="cloud-description">База Supabase уже подключена. Используй вход по почте для синхронизации между устройствами.</p>
+        <form id="cloud-config-form">
+          <label class="field-label" for="cloud-url">Project URL</label><input class="input" type="url" id="cloud-url" placeholder="https://xxxxx.supabase.co" autocomplete="url" required>
+          <label class="field-label mtop" for="cloud-key">Publishable / anon key</label><input class="input" type="text" id="cloud-key" placeholder="sb_publishable_..." autocomplete="off" required>
+          <p class="form-help">Никогда не вставляй service_role или secret key. Ключи проекта находятся в Supabase → Project Settings → API Keys.</p>
+          <button type="submit" class="button-primary cloud-full-button">Сохранить подключение</button>
+        </form>
+      </div>
+      <div id="cloud-auth-view" class="hidden">
+        <p class="cloud-description">Один личный аккаунт для всех устройств. Почта и пароль нужны только для входа.</p>
+        <div class="mode-tabs cloud-auth-tabs"><button type="button" data-cloud-action="login-mode" class="mode-tab active" id="cloud-login-tab">Войти</button><button type="button" data-cloud-action="signup-mode" class="mode-tab" id="cloud-signup-tab">Регистрация</button></div>
+        <form id="cloud-auth-form">
+          <label class="field-label" for="cloud-email">Электронная почта</label><input class="input" type="email" id="cloud-email" autocomplete="email" required>
+          <label class="field-label mtop" for="cloud-password">Пароль</label><input class="input" type="password" id="cloud-password" autocomplete="current-password" minlength="8" required>
+          <div id="cloud-auth-message" class="cloud-auth-message" role="status"></div>
+          <button type="submit" class="button-primary cloud-full-button" id="cloud-auth-submit">Войти в аккаунт</button>
+        </form>
+        <button type="button" class="cloud-text-button" data-cloud-action="forgot-password">Забыл пароль?</button>
+        <button type="button" class="cloud-text-button" data-cloud-action="edit-config">Изменить параметры Supabase</button>
+      </div>
+      <div id="cloud-user-view" class="hidden">
+        <div class="cloud-account-card"><span class="cloud-account-label">Ты вошёл как</span><strong id="cloud-user-email"></strong><span class="cloud-account-label" id="cloud-last-sync">Обновление…</span></div>
+        <div class="cloud-actions"><button type="button" class="button-secondary" data-cloud-action="sync-now">Синхронизировать сейчас</button><button type="button" class="button-secondary" data-cloud-action="copy-guest" id="cloud-import-guest">Перенести локальные дела</button></div>
+        <p class="form-help">Изменения сохраняются на устройстве сразу, а затем отправляются в облако. При конфликте версий программа предложит выбрать нужную копию.</p>
+        <button type="button" class="cloud-text-button" data-cloud-action="logout">Выйти из аккаунта</button>
+      </div>
+      <div id="cloud-reset-view" class="hidden">
+        <p class="cloud-description">Ссылка из письма подтверждена. Придумай новый пароль для своего аккаунта.</p>
+        <form id="cloud-reset-form"><label class="field-label" for="cloud-new-password">Новый пароль</label>
+          <input id="cloud-new-password" class="input" type="password" minlength="8" autocomplete="new-password" required>
+          <div id="cloud-reset-message" class="cloud-auth-message" role="status"></div>
+          <button class="button-primary cloud-full-button" type="submit" id="cloud-reset-submit">Сохранить новый пароль</button>
+        </form>
+      </div>
+      <div id="cloud-conflict-view" class="hidden">
+        <div class="cloud-warning" id="cloud-conflict-desc">Версии данных различаются. Выбери, какую сохранить.</div>
+        <div class="cloud-conflict-actions"><button type="button" class="button-secondary" data-cloud-action="download-local">Скачать местную копию</button><button type="button" class="button-secondary" data-cloud-action="use-remote">Взять из облака</button><button type="button" class="button-primary" data-cloud-action="use-local">Оставить местную</button></div>
+      </div>
+      <div id="cloud-migration-view" class="hidden">
+        <div class="cloud-warning">На устройстве найдены дела гостевого режима, а облако пока пустое. Перенести их в аккаунт?</div>
+        <div class="cloud-conflict-actions"><button type="button" class="button-primary" data-cloud-action="migrate-guest">Перенести мои дела</button><button type="button" class="button-secondary" data-cloud-action="start-clean">Начать с чистого облака</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite" role="status"></div>
+  <div id="storage-alert" class="storage-alert hidden" role="alert">Не удалось сохранить данные в браузере. Скачай резервную копию в настройках.</div>
+  <script src="config.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="cloud.js" defer></script>
+</body>
+</html>
