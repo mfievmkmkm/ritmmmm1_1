@@ -1,6 +1,6 @@
 'use strict';
-const CACHE='ritm-v3-1-live-2026-10-31';
-const ASSETS=['./','./index.html','./styles.css','./config.js','./app.js','./cloud.js','./manifest.webmanifest','./icons/icon.svg'];
+const CACHE='ritm-v3-1-png-2026-10-31';
+const ASSETS=['./','./index.html','./styles.css','./config.js','./app.js','./cloud.js','./manifest.webmanifest','./icons/icon-180.png','./icons/icon-192.png','./icons/icon-512.png','./icons/icon.svg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
